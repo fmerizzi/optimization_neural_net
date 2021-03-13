@@ -7,6 +7,7 @@ Basic functionalities:
 2) Run backprop algorithm, obtain gradient values of the network 
 3) update weight and biases 
 4) using basic sigmoid function neurons 
+5) Produce animation of bias and weight updates during epochs 
 
 ## Backprop algorithm visualization 
 
