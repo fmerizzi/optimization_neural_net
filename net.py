@@ -1,8 +1,7 @@
-import random
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import mnist_loader
+import loader
 import time 
 import copy
 
@@ -66,7 +65,7 @@ def plot_weights(weights_log):
         plt.show()
 
 
-def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases):
+def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,rnd):
     
         start = time.time()
         train_evaluation = []
@@ -84,7 +83,7 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases):
 	# cycle trough the requested number of epochs 
         for j in range(epochs):
 	    # Shuffle the training data, so to achieve random batches
-            random.shuffle(training_data)
+            rnd.shuffle(training_data)
 	    # A bit of code magic for producing the batches 
             mini_batches = split_data(training_data, mini_batch_size)
             print("mini batch len : ", len(mini_batches))
@@ -139,7 +138,6 @@ def backprop(x, y,biases,weights):
         activations = [x] # list to store all the activations, layer by layer
         zs = [] # list to store all the z vectors, layer by layer
         #FORWARD RUN 
-        # a cycle for 
         for b, w in zip(biases, weights):
         # We compute everything in vector form 
     
@@ -183,8 +181,11 @@ def activation(a,biases,weights):
         return a
 
 def sigmoid(z):
-    return 1.0/(1.0+np.exp(-z))
-
+    try:
+        return 1.0/(1.0+np.exp(-z))
+    except:
+        print(z)
+    
 def sigmoid_deriv(z):
     return sigmoid(z)*(1-sigmoid(z))
 
@@ -192,7 +193,7 @@ def sigmoid_deriv(z):
 ###############################################################################################################
 
 #Set network architecture
-sizes = [784,30,10]
+sizes = [784,10,10,10]
 num_layers = len(sizes)
 
 #prepare the bias/weights structures 
@@ -202,37 +203,44 @@ weight_matrix_dim = [sizes[:-1], sizes[1:]]
 print("bias matrix dim", bias_matrix_dim)
 print("weight matrix dim",weight_matrix_dim)
 
-rnd = np.random.RandomState(777)
+rnd = np.random.RandomState(1)
 
-biases = set_biases(bias_matrix_dim,rnd)
-weights = set_weights(weight_matrix_dim,rnd)
+biases = set_biases(bias_matrix_dim,copy.deepcopy(rnd))
+weights = set_weights(weight_matrix_dim,copy.deepcopy(rnd))
 
 train_evaluation = []
 timestamps = []
 train_evaluation2 = []
 timestamps2 = []
 
+# Load the data, as zip iterables 
+training_data, test_data = loader.load_data()
+#training_data,val, test_data = mnist_loader.load_data_wrapper()
 
-training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+# Hyperparameter set 
+epochs = [15,1]
+mini_batch_size = [200,600]
+eta = [6,3]
 
-print(type(training_data),training_data)
-print(type(validation_data),validation_data)
-print(type(test_data),test_data)
+# Set error so to be reactive to overflow 
+np.seterr(all='print')
+
+# Call the two train methods 
+train_evaluation,timestamps = train(copy.deepcopy(training_data), epochs[0], mini_batch_size[0], eta[0],
+                                    copy.deepcopy(test_data),copy.deepcopy(weights),copy.deepcopy(biases),copy.deepcopy(rnd))
+train_evaluation2,timestamps2 = train(copy.deepcopy(training_data),epochs[1], mini_batch_size[1], eta[1], 
+                                    copy.deepcopy(test_data),copy.deepcopy(weights),copy.deepcopy(biases),copy.deepcopy(rnd))
 
 
-
-train_evaluation,timestamps = train(copy.deepcopy(training_data), 5, 500, 1,
-                                    copy.deepcopy(test_data),copy.deepcopy(weights),copy.deepcopy(biases))
-train_evaluation2,timestamps2 = train(copy.deepcopy(training_data),5, 500, 1, 
-                                    copy.deepcopy(test_data),weights,biases)
-
-
+# Plot a train evaluation
 fig2, ax = plt.subplots()
-ax.plot(timestamps,train_evaluation,color="red",label="net 1")
-ax.plot(timestamps2,train_evaluation2,color="blue",label="net 2")
+ax.plot(timestamps,train_evaluation,color="red",label="batch: {0}, eta: {1}, epochs: {2}".format(mini_batch_size[0],eta[0],epochs[0]))
+ax.plot(timestamps2,train_evaluation2,color="blue",label="batch: {0}, eta: {1}, epochs: {2}".format(mini_batch_size[1],eta[1],epochs[1]))
 ax.set(xlabel='time (s)', ylabel='score',
        title='train evaluation')
 ax.grid()
+ax.legend(shadow=True, fontsize="large")
+
 plt.show()
 
  

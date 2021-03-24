@@ -1,13 +1,18 @@
- # Neural network project 
-Simple neural network implementation, based on MNIST example.
-net.py contains all the necessary functions. 
-Basic functionalities: 
+# Neural network optimizaton project AI_unibo_2021
 
-1) compute SGD on training data 
-2) Run backprop algorithm, obtain gradient values of the network 
-3) update weight and biases 
-4) using basic sigmoid function neurons 
-5) Produce animation of bias and weight updates during epochs 
+Simple neural network implementation, based on KMNIST classification.
+net.py contains all the necessary functions. 
+loader.py load the kmnist dataset and applies basic data transformations. 
+
+## Functionalities 
+
+1)  backpropagation algorithm with SGD 
+2)  basic sigmoid function activations
+3)  quadratic cost function 
+4)  animation showing the change in bias and weights 
+5)  basic train evaluation tools: time, accuracy
+6)  basic hyperparamenter tuning with graph equalizing time, random initializaions
+7)  shows vanishing gradient problem 
 
 ## Backprop algorithm visualization 
 
