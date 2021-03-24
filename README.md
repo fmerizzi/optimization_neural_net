@@ -20,6 +20,8 @@ loader.py load the kmnist dataset and applies basic data transformations.
 ![backprop](https://user-images.githubusercontent.com/32902835/110661686-1c673b80-81c5-11eb-8117-ff8f0a7c6c7d.png)
 
 ## Examples of weight and bias animation
+The program saves mid-training weights and biases for visualization purposes. The animation shows how the network change its parameters with gradient descent. It is possible to show the vanishing gradient problem by inspecting the first layer. 
+
 ![weight](https://user-images.githubusercontent.com/32902835/112352990-91f60000-8ccb-11eb-814a-a8919fad04d0.gif)
 
 ![bias](https://user-images.githubusercontent.com/32902835/112353099-b2be5580-8ccb-11eb-8cbd-0e8440df05ae.gif)
