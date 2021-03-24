@@ -1,6 +1,6 @@
 # Neural network optimizaton project AI_unibo_2021
 
-Simple neural network implementation, based on KMNIST classification.
+Simple neural network implementation, based on KMNIST (japanese ideograms) classification.
 net.py contains all the necessary functions. 
 loader.py load the kmnist dataset and applies basic data transformations. 
 
