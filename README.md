@@ -7,13 +7,20 @@ loader.py load the kmnist dataset and applies basic data transformations.
 
 ## Functionalities 
 
+### Vanilla network
 1)  backpropagation algorithm with SGD 
-2)  basic sigmoid function activations
+2)  basic sigmoid activation function
 3)  quadratic cost function 
-4)  animation showing the change in bias and weights 
-5)  basic train evaluation tools: time, accuracy
-6)  basic hyperparamenter tuning with graph equalizing time, random initializaions
-7)  shows vanishing gradient problem 
+4)  random gaussian weight inizialization 
+### Improovements 
+1) weight inizialization
+2) L2 reugularization
+3) cross entropy cost function? 
+### Other features 
+6)  animation showing the change in bias and weights matrix
+7)  basic train evaluation tools: time, accuracy
+8)  basic hyperparamenter tuning with graph equalizing time, random initializaions
+9)  shows vanishing gradient problem 
 
 ## Backprop algorithm visualization 
 
