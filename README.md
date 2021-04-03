@@ -14,8 +14,9 @@ loader.py load the kmnist dataset and applies basic data transformations.
 4)  random gaussian weight inizialization 
 ### Improovements 
 1) weight inizialization
-2) L2 reugularization
+2) L2 regularization
 3) cross entropy cost function? 
+4) learning rate scheduler?
 ### Other features 
 6)  animation showing the change in bias and weights matrix
 7)  basic train evaluation tools: time, accuracy
