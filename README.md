@@ -17,6 +17,7 @@ loader.py load the kmnist dataset and applies basic data transformations.
 2) L2 regularization
 3) cross entropy cost function? 
 4) learning rate scheduler?
+5) momentum based SGD? 
 ### Other features 
 6)  animation showing the change in bias and weights matrix
 7)  basic train evaluation tools: time, accuracy
