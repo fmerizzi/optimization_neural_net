@@ -15,7 +15,7 @@ loader.py load the kmnist dataset and applies basic data transformations.
 ### Improovements 
 1) weight inizialization
 2) L2 regularization
-3) cross entropy cost function? 
+3) cross entropy cost function
 4) learning rate scheduler?
 5) momentum based SGD? 
 ### Other features 
