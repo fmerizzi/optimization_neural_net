@@ -88,19 +88,19 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
         n_test = len(test_data)
 	    # cycle trough the requested number of epochs 
         for i in range(epochs):
-	         # Shuffle the training data, so to achieve random batches
+	        # Shuffle the training data, so to achieve random batches
             rnd.shuffle(training_data)
-	        # A bit of code magic for producing the batches 
+	        # split the data in batches
             mini_batches = split_data(training_data, mini_batch_size)
-            print("mini batch len : ", len(mini_batches))
+            print("batches number : ", len(mini_batches))
             
             # SGD
-	        # Now iterate trough the batches and do the backprop
+	        # Update paramenters for each mini batch
             for mini_batch in mini_batches:
-            		# update weights and biases 
-            		# Prepare the arrays for the nablas weights and biases
-                    nabla_b = [np.zeros_like(b) for b in biases]
-                    nabla_w = [np.zeros_like(w) for w in weights]
+            		
+            		# Prepare the arrays for the partial derivatives of weights and biases
+                    partial_deriv_biases = [np.zeros_like(b) for b in biases]
+                    partial_deriv_weights = [np.zeros_like(w) for w in weights]
 
             		# for each training example, we run the backprop trough the network
                     for x, y in mini_batch:
@@ -108,24 +108,25 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
             		    # containing the partial derivatives with respect to weight and bias
                         deriv_bias, deriv_weight = backprop(x, y,biases,weights,cross_entropy)
             		    #sum the values
-                        for l in range(len(nabla_b)):
-                            nabla_b[l] = nabla_b[l] + deriv_bias[l]
-                        for l in range(len(nabla_w)):
-                            nabla_w[l] = nabla_w[l] + deriv_weight[l]
+                        for l in range(len(partial_deriv_biases)):
+                            partial_deriv_biases[l] = partial_deriv_biases[l] + deriv_bias[l]
+                        for l in range(len(partial_deriv_weights)):
+                            partial_deriv_weights[l] = partial_deriv_weights[l] + deriv_weight[l]
                         
             		# finally compute the updated values of weights and biases         
                     # Optional L2 regularization 
                     if(L2==True):
-                        weights = [(1-eta*(3/len(training_data)))*w-(eta/len(mini_batch))*nw
-            		                for w, nw in zip(weights, nabla_w)]
+                        for l in range(len(weights)):
+                            weights[l] = (1-(4/len(training_data))*weights[l]) - (eta/len(mini_batch))*partial_deriv_weights[l]
                     else:
-                        weights = [w-(eta/len(mini_batch))*nw
-            		                for w, nw in zip(weights, nabla_w)]
-                        
-                    biases = [b-(eta/len(mini_batch))*nb
-            		               for b, nb in zip(biases, nabla_b)]
+                        for l in range(len(weights)):
+                            weights[l] = weights[l] - (eta/len(mini_batch))*partial_deriv_weights[l]
+
+                    for l in range(len(biases)):
+                            biases[l] = biases[l] - (eta/len(mini_batch))*partial_deriv_biases[l]
+
             
-            # For testing is simple classification check 
+            # time evaluation
             timestamps.append(time.time() - start)
             
             #Get current net performance 
@@ -148,9 +149,8 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
         return train_evaluation, timestamps
 
 
-def backprop(x, y,biases,weights,cross_entropy):
+def backprop(net_input, y,biases,weights,cross_entropy):
     
-        net_input = x
         a = [] # list to store all the activations, layer by layer
         zs = [] # list to store all the z vectors, layer by layer
         
@@ -248,21 +248,21 @@ timestamps2 = []
 training_data, test_data = loader.load_data()
 
 # Hyperparameter set 
-epochs = [1,7]
-mini_batch_size = [100,200]
-eta = [1.5,1.5]
+epochs = [5,5]
+mini_batches = [100,200]
+eta = [1.5,3]
 
 
 # Set error so to be reactive to overflow 
 np.seterr(all='print')
 
 # Call the two train methods 
-train_evaluation,timestamps = train(copy.deepcopy(training_data), epochs[0], mini_batch_size[0], eta[0],
+train_evaluation,timestamps = train(copy.deepcopy(training_data), epochs[0], mini_batches[0], eta[0],
                                     copy.deepcopy(test_data),copy.deepcopy(weights),copy.deepcopy(biases),copy.deepcopy(rnd),
-                                    plot=False,
-                                    L2=True,
-                                    cross_entropy=True)
-train_evaluation2,timestamps2 = train(copy.deepcopy(training_data),epochs[1], mini_batch_size[1], eta[1], 
+                                    plot=True,
+                                    L2=False,
+                                    cross_entropy=False)
+train_evaluation2,timestamps2 = train(copy.deepcopy(training_data),epochs[1], mini_batches[1], eta[1], 
                                     copy.deepcopy(test_data),copy.deepcopy(weights),copy.deepcopy(biases),copy.deepcopy(rnd),
                                     plot=True,
                                     L2=False,
@@ -271,8 +271,8 @@ train_evaluation2,timestamps2 = train(copy.deepcopy(training_data),epochs[1], mi
 
 # Plot a train evaluation
 fig2, ax = plt.subplots()
-ax.plot(timestamps,train_evaluation,color="red",label="1- batch: {0}, eta: {1}, epochs: {2}".format(mini_batch_size[0],eta[0],epochs[0]))
-ax.plot(timestamps2,train_evaluation2,color="blue",label="2- batch: {0}, eta: {1}, epochs: {2}".format(mini_batch_size[1],eta[1],epochs[1]))
+ax.plot(timestamps,train_evaluation,color="red",label="1- batch: {0}, eta: {1}, epochs: {2}".format(mini_batches[0],eta[0],epochs[0]))
+ax.plot(timestamps2,train_evaluation2,color="blue",label="2- batch: {0}, eta: {1}, epochs: {2}".format(mini_batches[1],eta[1],epochs[1]))
 ax.set(xlabel='time (s)', ylabel='score',
        title='train evaluation')
 ax.grid()
