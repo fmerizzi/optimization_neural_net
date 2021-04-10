@@ -90,7 +90,7 @@ def plot_weights(weights_log):
 
 def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,rnd,plot=True,L2=True,cross_entropy=False):
         
-        # Start time, timestamps for evaluation purposes 
+        # Start time, timestamps for tuning purposes 
         start = time.time()
         train_evaluation = []
         timestamps =  []
@@ -105,7 +105,7 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
             rnd.shuffle(training_data)
 	        # split the data in batches
             mini_batches = split_data(training_data, mini_batch_size)
-            print("batches number : ", len(mini_batches))
+            print("mini batches number : ", len(mini_batches))
             
             # SGD
 	        # Update paramenters for each mini batch
@@ -115,7 +115,7 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
                     partial_deriv_biases = [np.zeros_like(b) for b in biases]
                     partial_deriv_weights = [np.zeros_like(w) for w in weights]
 
-            		# for each training example, we run the backprop trough the network
+            		# for each training example run trough the network
                     for x, y in mini_batch:
             		    # we obtain from the network the two vectors 
             		    # containing the partial derivatives with respect to weight and bias
@@ -129,8 +129,10 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
             		# finally compute the updated values of weights and biases         
                     # Optional L2 regularization 
                     if(L2==True):
+                        # L2 reg parameter
+                        lambda_ = 4
                         for l in range(len(weights)):
-                            weights[l] = (1-(4/len(training_data))*weights[l]) - (eta/len(mini_batch))*partial_deriv_weights[l]
+                            weights[l] = (1-(lambda_/len(training_data))*weights[l]) - (eta/len(mini_batch))*partial_deriv_weights[l]
                     else:
                         for l in range(len(weights)):
                             weights[l] = weights[l] - (eta/len(mini_batch))*partial_deriv_weights[l]
@@ -143,7 +145,7 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
             timestamps.append(time.time() - start)
             
             #Get current net performance 
-            v = evaluate(test_data,biases,weights)
+            v = evaluation(test_data,biases,weights)
             print("{0} --> correct classifications: ({1} / {2}) ".format(
                 i, v, n_test))
             # update the train evaluation list 
@@ -161,7 +163,6 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
             plot_weights(weights_log)
         return train_evaluation, timestamps
 
-
 def backprop(net_input, y,biases,weights,cross_entropy):
     
         a = [] # list to store all the activations, layer by layer
@@ -173,6 +174,7 @@ def backprop(net_input, y,biases,weights,cross_entropy):
         
         a.append(net_input)
        
+        # Iteration trough the layers 
         for b, w in zip(biases, weights):
         # We compute everything in vector form 
     
@@ -186,7 +188,7 @@ def backprop(net_input, y,biases,weights,cross_entropy):
         # backward run trough the network 
 	    # calculate the first delta 
         if(cross_entropy == True):
-            delta = crossCost_derivarive(a[-1], y,zs[-1]) 
+            delta = crosscost_derivarive(a[-1], y,zs[-1]) 
         else:
             delta = quadcost_derivative(a[-1], y,zs[-1]) 
             
@@ -202,58 +204,69 @@ def backprop(net_input, y,biases,weights,cross_entropy):
 	    # calculate each value for bias and weight, as in (BP3/4)
             deriv_bias[l] = delta
             deriv_weight[l] = np.dot(delta, a[l-1].transpose())
-	#return the two vectors 
+	    #return the two vectors 
         return (deriv_bias, deriv_weight)
 
 def quadcost_derivative(output_activations, y,z):
         return ((output_activations-y) * sigmoid_deriv(z))
-def crossCost_derivarive(output_activations, y,z):
-        #Simply remove the activation term
+    
+def crosscost_derivarive(output_activations, y,z):
+        #Simply remove the sigmoid term
         return (output_activations-y) 
 
-def evaluate(test_data,biases,weights):
-        # TODO 
-        # In a better way
-        test_results = [(np.argmax(activation(x,biases,weights)), y)
-                        for (x, y) in test_data]
-        return sum(int(x == y) for (x, y) in test_results)
-
-def activation(a,biases,weights):
-	#Function for evaluation 
-	# Vectorized calc. and results if input is a         
-        for b, w in zip(biases,weights):
-            a = sigmoid(np.dot(w, a)+b)
-        return a
+def evaluation(test_data,biases,weights):
+        tmp = []
+        results = []
+        # we get the output for every test input
+        for x,y in test_data:
+            results.append((net_output(x,biases,weights),y))
+        for i in results:
+            # Argmax for finding the most likely result 
+            tmp.append((np.argmax(i[0]),i[1]))
+        correct_classifications = 0
+        for (x,y) in tmp:
+            if(int(x)==int(y)):
+                correct_classifications = correct_classifications + 1
+        return correct_classifications
+    
+def net_output(net_input,biases,weights):
+	#Forward pass in the network 
+    # get current output given input (evaluation purposes)    
+    for i in range(len(weights)):
+        current_z = np.dot(weights[i],net_input) + biases[i]
+        net_input = sigmoid(current_z)
+    return net_input
 
 def sigmoid(z):
     try:
         return 1.0/(1.0+np.exp(-z))
     except:
+        # Overflow check 
         print(z)
     
 def sigmoid_deriv(z):
     return sigmoid(z)*(1-sigmoid(z))
 
-
 ###############################################################################################################
 
-# PARAMETER SETTING 
+# PARAMETERS SETTING 
 #Set network architecture
-sizes = [784,10,10]
+sizes = [784,28,10,10]
 #Set if unsaturated weights
 unsaturated_weights = True
-# Hyperparameter set 
-epochs = [5,5]
-mini_batches = [100,200]
+epochs = [20,20]
+mini_batches_len = [100,50]
 eta = [1.5,3]
+cross_entropy = [True,True]
+L2_regularization = [False,False]
+plot_animations = [True,True]
 
 ###############################################################################################################
 num_layers = len(sizes)
 # Prepare biases for each level except the first 
 bias_matrix_dim = sizes[1:]
-#weight_matrix_dim = [sizes[:-1], sizes[1:]]
+# Prepare weights 
 weight_matrix_dim = prepare_weightMatrix_dim(sizes)
-
 
 print("bias matrix dim", bias_matrix_dim)
 print("weight matrix dim",weight_matrix_dim)
@@ -267,7 +280,6 @@ if(unsaturated_weights==True):
 else:
     weights = set_weights(weight_matrix_dim,copy.deepcopy(rnd))
 
-
 train_evaluation = []
 timestamps = []
 train_evaluation2 = []
@@ -276,27 +288,25 @@ timestamps2 = []
 # Load the data, as zip iterables 
 training_data, test_data = loader.load_data()
 
-
 # Set error so to be reactive to overflow 
 np.seterr(all='print')
 
 # Call the two train methods 
-train_evaluation,timestamps = train(copy.deepcopy(training_data), epochs[0], mini_batches[0], eta[0],
+train_evaluation,timestamps = train(copy.deepcopy(training_data), epochs[0], mini_batches_len[0], eta[0],
                                     copy.deepcopy(test_data),copy.deepcopy(weights),copy.deepcopy(biases),copy.deepcopy(rnd),
-                                    plot=True,
-                                    L2=False,
-                                    cross_entropy=False)
-train_evaluation2,timestamps2 = train(copy.deepcopy(training_data),epochs[1], mini_batches[1], eta[1], 
+                                    plot=plot_animations[0],
+                                    L2=L2_regularization[0],
+                                    cross_entropy=cross_entropy[0])
+train_evaluation2,timestamps2 = train(copy.deepcopy(training_data),epochs[1], mini_batches_len[1], eta[1], 
                                     copy.deepcopy(test_data),copy.deepcopy(weights),copy.deepcopy(biases),copy.deepcopy(rnd),
-                                    plot=True,
-                                    L2=False,
-                                    cross_entropy=True)
-
+                                    plot=plot_animations[1],
+                                    L2=L2_regularization[1],
+                                    cross_entropy=cross_entropy[1])
 
 # Plot a train evaluation
 fig2, ax = plt.subplots()
-ax.plot(timestamps,train_evaluation,color="red",label="1- batch: {0}, eta: {1}, epochs: {2}".format(mini_batches[0],eta[0],epochs[0]))
-ax.plot(timestamps2,train_evaluation2,color="blue",label="2- batch: {0}, eta: {1}, epochs: {2}".format(mini_batches[1],eta[1],epochs[1]))
+ax.plot(timestamps,train_evaluation,color="red",label="1- batchLen: {0}, eta: {1}, epochs: {2}".format(mini_batches_len[0],eta[0],epochs[0]))
+ax.plot(timestamps2,train_evaluation2,color="blue",label="2- batchLen: {0}, eta: {1}, epochs: {2}".format(mini_batches_len[1],eta[1],epochs[1]))
 ax.set(xlabel='time (s)', ylabel='score',
        title='train evaluation')
 ax.grid()
