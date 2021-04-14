@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: fmerizzi
+github.com/fmerizzi/optimization_neural_net/
 """
 
 import numpy as np
