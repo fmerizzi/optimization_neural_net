@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: fmerizzi
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -64,7 +70,7 @@ def plot_biases(biases_log):
 def plot_weights(weights_log):
         
         #fig, ax = plt.subplots(figsize=[7,5])
-        fig, ax = plt.subplots(figsize=[14,10])
+        fig, ax = plt.subplots(figsize=[8,6])
         ax.set_xticklabels([0])
         # Calclulate change 
         change = weights_log[-1] - weights_log[0] 
@@ -132,7 +138,7 @@ def train(training_data, epochs, mini_batch_size, eta,test_data,weights,biases,r
                         # L2 reg parameter
                         lambda_ = 4
                         for l in range(len(weights)):
-                            weights[l] = (1-(lambda_/len(training_data))*weights[l]) - (eta/len(mini_batch))*partial_deriv_weights[l]
+                            weights[l] = ((1-(lambda_/len(training_data))) * weights[l]) - (eta/len(mini_batch))*partial_deriv_weights[l]
                     else:
                         for l in range(len(weights)):
                             weights[l] = weights[l] - (eta/len(mini_batch))*partial_deriv_weights[l]
@@ -168,15 +174,14 @@ def backprop(net_input, y,biases,weights,cross_entropy):
         a = [] # list to store all the activations, layer by layer
         zs = [] # list to store all the z vectors, layer by layer
         
-	    # Define the two empty vectors representing the cost gradient 
+	    # Two empty vectors carrying the result 
         deriv_bias = [np.zeros_like(b) for b in biases]
         deriv_weight = [np.zeros_like(w) for w in weights]
         
         a.append(net_input)
-       
-        # Iteration trough the layers 
+        # FORWARD RUN
+        # Iteration trough the layers, everything computed in vector form
         for b, w in zip(biases, weights):
-        # We compute everything in vector form 
     
 	    #compute each intermediate value z
             z = np.dot(w, net_input)+b
@@ -193,8 +198,8 @@ def backprop(net_input, y,biases,weights,cross_entropy):
             delta = quadcost_derivative(a[-1], y,zs[-1]) 
             
         deriv_bias[-1] = delta
+        deriv_weight[-1] = np.dot(delta, a[-2].transpose())
         #BACKWARD RUN 
-	    # and then all the others running backward 
         for l in range(-2, -len(sizes),-1):
             z = zs[l]
             sigma_prime = sigmoid_deriv(z)
@@ -251,14 +256,14 @@ def sigmoid_deriv(z):
 
 # PARAMETERS SETTING 
 #Set network architecture
-sizes = [784,28,10,10]
+sizes = [784,28,28,10]
 #Set if unsaturated weights
 unsaturated_weights = True
-epochs = [20,20]
-mini_batches_len = [100,50]
-eta = [1.5,3]
-cross_entropy = [True,True]
-L2_regularization = [False,False]
+epochs = [8,8]
+mini_batches_len = [100,100]
+eta = [0.9,0.9]
+cross_entropy = [True,False]
+L2_regularization = [True,False]
 plot_animations = [True,True]
 
 ###############################################################################################################
@@ -271,7 +276,7 @@ weight_matrix_dim = prepare_weightMatrix_dim(sizes)
 print("bias matrix dim", bias_matrix_dim)
 print("weight matrix dim",weight_matrix_dim)
 
-rnd = np.random.RandomState(1)
+rnd = np.random.RandomState(121)
 
 biases = set_biases(bias_matrix_dim,copy.deepcopy(rnd))
 # Using the unsaturated version dramatically improves the first stages of learning
@@ -313,5 +318,3 @@ ax.grid()
 ax.legend(shadow=True, fontsize="large")
 
 plt.show()
-
-  

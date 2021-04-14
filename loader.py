@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+@author: fmerizzi
+"""
+
 import numpy as np 
 import os
 # Util for pwd 
@@ -16,10 +22,10 @@ def unit_vector(j):
 
 def load_data():
     #load data 
-    test_imgs = np.load("../new_net/kmnist-test-imgs.npz")['arr_0']
-    test_labels = np.load("../new_net/kmnist-test-labels.npz")['arr_0']
-    train_imgs = np.load("../new_net/kmnist-train-imgs.npz")['arr_0']
-    train_labels = np.load("../new_net/kmnist-train-labels.npz")['arr_0']
+    test_imgs = np.load("./kmnist-test-imgs.npz")['arr_0']
+    test_labels = np.load("./kmnist-test-labels.npz")['arr_0']
+    train_imgs = np.load("./kmnist-train-imgs.npz")['arr_0']
+    train_labels = np.load("./kmnist-train-labels.npz")['arr_0']
     
     #cast 
     test_imgs = test_imgs.astype("float32")
@@ -50,7 +56,7 @@ def load_data():
     test_inputs = [np.reshape(x, [784,1]) for x in test_imgs]
     test_data = zip(test_inputs, test_labels)
     
-    return (training_data, test_data)
+    return (list(training_data), list(test_data))
 
 
 
