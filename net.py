@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 @author: fmerizzi
-github.com/fmerizzi/optimization_neural_net/
 """
 
 import numpy as np
@@ -262,7 +261,7 @@ sizes = [784,28,28,10]
 unsaturated_weights = True
 epochs = [8,8]
 mini_batches_len = [100,100]
-eta = [0.9,0.9]
+eta = [0.6,0.6]
 cross_entropy = [True,False]
 L2_regularization = [True,False]
 plot_animations = [True,True]

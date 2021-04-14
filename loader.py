@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 @author: fmerizzi
-github.com/fmerizzi/optimization_neural_net/
 """
 
 import numpy as np 
@@ -25,8 +24,8 @@ def load_data():
     #load data 
     test_imgs = np.load("./kmnist-test-imgs.npz")['arr_0']
     test_labels = np.load("./kmnist-test-labels.npz")['arr_0']
-    train_imgs = np.load("./kmnist-train-imgs.npz")['arr_0']
-    train_labels = np.load("./kmnist-train-labels.npz")['arr_0']
+    train_imgs = np.load("./train_img_reduced.npz")['arr_0']
+    train_labels = np.load("./train_labels_reduced.npz")['arr_0']
     
     #cast 
     test_imgs = test_imgs.astype("float32")
@@ -38,7 +37,7 @@ def load_data():
     # Reshape so that the input is a single array of dimension 784 
     #(rather than 28x28)
     test_imgs = np.reshape(test_imgs,[10000,784])
-    train_imgs = np.reshape(train_imgs,[60000,784])
+    train_imgs = np.reshape(train_imgs,[50000,784])
     
     # Data is raw, normalization is necessary to avoid overflow with the sigmoid 
     scaler = MinMaxScaler(feature_range=(0,1))
